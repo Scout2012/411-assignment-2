@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="claim_title" type="id"/>
+    <item name="claim_date" type="id"/>
+    <item name="add_btn" type="id"/>
+    <item name="status_text" type="id"/>
+    <item name="status_value_text" type="id"/>
+</resources>
