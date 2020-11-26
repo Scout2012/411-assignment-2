@@ -1,5 +1,5 @@
 package org.csuf.cpsc411.simplehttpclient
 
-class Person(var firstName:String?, var lastName:String?, var ssn:String?) {
+class Claim(var claimTitle:String?, var claimDate:String?) {
     var toBeDeleted : Boolean = false
 }
