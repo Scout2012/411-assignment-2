@@ -56,10 +56,7 @@ class ClaimService (val ctx : CustomActivity){
                 claimList = gson.fromJson(String(responseBody), claimListType)
                 //
                 ctx.refreshScreen(claimList[currentIndx])
-                //
-                //act.runOnUiThread {
-                //    cbLambdaFunction()
-                //}
+
                 Log.d("Claim Service", "The Claim List: ${claimList}")
             }
         }
@@ -74,7 +71,8 @@ class ClaimService (val ctx : CustomActivity){
         }
     }
 
-    inner class addServiceRespHandler : AsyncHttpResponseHandler() {
+    inner class addServiceRespHandler(title: String) : AsyncHttpResponseHandler() {
+        val title = title
         override fun onSuccess(
             statusCode: Int,
             headers: Array<out Header>?,
@@ -83,8 +81,8 @@ class ClaimService (val ctx : CustomActivity){
             if (responseBody != null) {
                 val respStr = String(responseBody)
                 val statusValue = ctx.findViewById<TextView>(R.id.status_value_text)
-                statusValue.text = "Successfully added claim to database!"
-                Log.d("Claim Service", "The add Service response : ${respStr}")
+                statusValue.text = "Successfully added `${title}` claim to database!"
+                Log.d("Claim Service", "The add Service response : `${respStr}`")
             }
         }
 
@@ -95,22 +93,21 @@ class ClaimService (val ctx : CustomActivity){
             error: Throwable?
         ) {
             val statusValue = ctx.findViewById<TextView>(R.id.status_value_text)
-            statusValue.text = "Could not add claim to database! Server returned status code ${statusCode}"
+            statusValue.text = "Could not add `${title}` to database!"
             Log.d("Claim Service", error?.message.toString())
         }
     }
 
-    fun addClaim(pObj : Claim) {
+    fun addClaim(cObj : Claim) {
         Log.d("Claim Service", "Adding Claim")
         val client = AsyncHttpClient()
-        val requestUrl = "http://0.0.0.0:8080/ClaimService/add"
+        val requestUrl = "http://192.168.0.112:8010/ClaimService/add"
         // 1. Convert the pObj into JSON string
-        val pJsonString= Gson().toJson(pObj)
+        val pJsonString= Gson().toJson(cObj)
         // 2. Send the post request
         val entity = StringEntity(pJsonString)
-        Log.d("Claim Service", pJsonString + "  " + entity)
         // cxt is an Android Application Context object
-       var postResponse = client.post(ctx, requestUrl, entity,"application/json", addServiceRespHandler())
+       var postResponse = client.post(ctx, requestUrl, entity,"application/json", addServiceRespHandler(cObj.claimTitle))
         Log.d("Claim Service", postResponse.toString())
 
     }
@@ -120,7 +117,7 @@ class ClaimService (val ctx : CustomActivity){
         // Call Http
         //clientObj = clObj
         val client = AsyncHttpClient()
-        val requestUrl = "http://0.0.0.0:8080/ClaimService/getAll"
+        val requestUrl = "http://192.168.0.112:8010/ClaimService/getAll"
         //
         Log.d("Claim Service", "About Sending the HTTP Request. ")
         //
