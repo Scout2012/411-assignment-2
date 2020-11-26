@@ -1,8 +1,7 @@
 package org.csuf.cpsc411.simplehttpclient
 
-import android.app.Activity
-import android.content.Context
 import android.util.Log
+import android.widget.TextView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.loopj.android.http.AsyncHttpClient
@@ -11,36 +10,36 @@ import cz.msebera.android.httpclient.Header
 import cz.msebera.android.httpclient.entity.StringEntity
 import java.lang.reflect.Type
 
-class PersonService (val ctx : CustomActivity){
+class ClaimService (val ctx : CustomActivity){
 
-    var personList : MutableList<Person> = mutableListOf()
+    var claimList : MutableList<Claim> = mutableListOf()
     var currentIndx : Int = 0
 
     companion object {
-        private var pService : PersonService? = null
+        private var pService : ClaimService? = null
 
-        fun getInstance(act : CustomActivity) : PersonService {
+        fun getInstance(act : CustomActivity) : ClaimService {
             if (pService == null) {
-                pService = PersonService(act)
+                pService = ClaimService(act)
             }
 
             return pService!!
         }
     }
 
-    fun next() : Person {
+    fun next() : Claim {
         currentIndx = currentIndx + 1
-        return personList[currentIndx]
+        return claimList[currentIndx]
     }
 
     fun isLastObject() : Boolean  {
-        if (currentIndx == personList.count()-1) return true
+        if (currentIndx == claimList.count()-1) return true
         return false
     }
 
-    fun fetchAt(e : Int) : Person {
+    fun fetchAt(e : Int) : Claim {
         currentIndx = e
-        return personList[currentIndx]
+        return claimList[currentIndx]
     }
 
     inner class GetAllServiceRespHandler : AsyncHttpResponseHandler() {
@@ -51,19 +50,17 @@ class PersonService (val ctx : CustomActivity){
         ) {
             // JSON string
             if (responseBody != null) {
-                Log.d("Person Service", "The response JSON string is ${String(responseBody)}")
+                Log.d("Claim Service", "The response JSON string is ${String(responseBody)}")
                 val gson = Gson()
-                val personListType: Type = object : TypeToken<List<Person>>() {}.type
-                personList = gson.fromJson(String(responseBody), personListType)
+                val claimListType: Type = object : TypeToken<List<Claim>>() {}.type
+                claimList = gson.fromJson(String(responseBody), claimListType)
                 //
-//                if (ctx is SummaryScreenActivity) {
-//                    (ctx as SummaryScreenActivity).refreshScreen()
-//                } else ctx.refreshScreen(personList[currentIndx])
+                ctx.refreshScreen(claimList[currentIndx])
                 //
                 //act.runOnUiThread {
                 //    cbLambdaFunction()
                 //}
-                Log.d("Person Service", "The Person List: ${personList}")
+                Log.d("Claim Service", "The Claim List: ${claimList}")
             }
         }
 
@@ -85,7 +82,9 @@ class PersonService (val ctx : CustomActivity){
         ) {
             if (responseBody != null) {
                 val respStr = String(responseBody)
-                Log.d("Person Service", "The add Service response : ${respStr}")
+                val statusValue = ctx.findViewById<TextView>(R.id.status_value_text)
+                statusValue.text = "Successfully added claim to database!"
+                Log.d("Claim Service", "The add Service response : ${respStr}")
             }
         }
 
@@ -95,30 +94,35 @@ class PersonService (val ctx : CustomActivity){
             responseBody: ByteArray?,
             error: Throwable?
         ) {
-            TODO("Not yet implemented")
+            val statusValue = ctx.findViewById<TextView>(R.id.status_value_text)
+            statusValue.text = "Could not add claim to database! Server returned status code ${statusCode}"
+            Log.d("Claim Service", error?.message.toString())
         }
     }
 
-    fun addPerson(pObj : Person) {
+    fun addClaim(pObj : Claim) {
+        Log.d("Claim Service", "Adding Claim")
         val client = AsyncHttpClient()
-        val requestUrl = "http://192.168.0.112:8010/PersonService/add"
+        val requestUrl = "http://0.0.0.0:8080/ClaimService/add"
         // 1. Convert the pObj into JSON string
         val pJsonString= Gson().toJson(pObj)
         // 2. Send the post request
         val entity = StringEntity(pJsonString)
-
+        Log.d("Claim Service", pJsonString + "  " + entity)
         // cxt is an Android Application Context object
-        client.post(ctx, requestUrl, entity,"application/json", addServiceRespHandler())
+       var postResponse = client.post(ctx, requestUrl, entity,"application/json", addServiceRespHandler())
+        Log.d("Claim Service", postResponse.toString())
+
     }
 
     fun getAll()  {
-        //var pList : List<Person> = mutableListOf()
+        //var pList : List<Claim> = mutableListOf()
         // Call Http
         //clientObj = clObj
         val client = AsyncHttpClient()
-        val requestUrl = "http://192.168.0.112:8010/PersonService/getAll"
+        val requestUrl = "http://0.0.0.0:8080/ClaimService/getAll"
         //
-        Log.d("Person Service", "About Sending the HTTP Request. ")
+        Log.d("Claim Service", "About Sending the HTTP Request. ")
         //
         client.get(requestUrl, GetAllServiceRespHandler())
     }

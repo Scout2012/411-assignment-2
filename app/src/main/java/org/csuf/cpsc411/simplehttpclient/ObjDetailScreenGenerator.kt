@@ -80,7 +80,7 @@ class ObjDetailScreenGenerator(val ctx : Context) {
 
         val statusValueText = TextView(ctx)
         statusValueText.text = "Unknown"
-        statusValueText.setId(R.id.status_text)
+        statusValueText.setId(R.id.status_value_text)
 
         statusLayout.addView(statusValueText, statusValueParams)
 
